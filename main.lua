@@ -1,4 +1,5 @@
--- Initialize wESP32
+print("eth init")
+
 eth.init({phy=eth.PHY_LAN8720,
 addr=1,
 power=16,
@@ -6,7 +7,7 @@ clock_mode=eth.CLOCK_GPIO0_IN,
 mdc=23,
 mdio=18})
 
-file.open("cfg.lua", "r")
+file.open("eth.cfg", "r")
 str = file.readline()
 local t={}
 sep = ","
@@ -29,16 +30,17 @@ end
 function ev(event, info)
     print("event", event)
     if event == "got_ip" then
-        file.open("cfg.lua","w+")
+        file.open("eth.cfg","w+")
         set = info.ip..','..info.netmask..','..info.gw..',dhcp'    
         file.write(set)
         file.close()
         print("ip:"..info.ip..", nm:"..info.netmask..", gw:"..info.gw)
         gpio.write(4, 1)
+        dofile('web.lua')
     elseif event == "connected" then
         print("speed:", eth.get_speed())
         print("mac:", eth.get_mac())
-        dofile('web.lua')
+        
     end
 end
 
